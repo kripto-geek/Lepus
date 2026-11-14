@@ -14,7 +14,7 @@ def init(domain):
     PT_SECRET = parser.get("PassiveTotal", "PT_SECRET")
 
     if not PT_KEY or not PT_SECRET:
-        print("  \__", colored("No PassiveTotal API credentials configured", "red"))
+        print("  \\__", colored("No PassiveTotal API credentials configured", "red"))
         return []
 
     auth = (PT_KEY, PT_SECRET)
@@ -24,10 +24,10 @@ def init(domain):
         response = requests.get(url, auth=auth, timeout=10)
         if response.status_code == 200:
             PT = response.json().get('subdomains', [])
-            print(f"  \__ {colored('Subdomains found', 'green')}: {len(PT)}")
+            print(f"  \\__ {colored('Subdomains found', 'green')}: {len(PT)}")
         else:
-            print(f"  \__ {colored('Error', 'red')}: {response.status_code}")
+            print(f"  \\__ {colored('Error', 'red')}: {response.status_code}")
     except Exception as e:
-        print(f"  \__ {colored('PassiveTotal API Error', 'red')}: {e}")
+        print(f"  \\__ {colored('PassiveTotal API Error', 'red')}: {e}")
 
     return PT

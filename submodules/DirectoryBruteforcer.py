@@ -40,11 +40,11 @@ def init(db, domain):
     try:
         resolved_subdomains = utilities.DatabaseHelpers.getResolvedSubdomains(db, domain)
     except Exception as e:
-        print(colored(f"  \__ Error retrieving resolved subdomains: {e}", "red"))
+        print(colored(f"  \\__ Error retrieving resolved subdomains: {e}", "red"))
         return
 
     if not resolved_subdomains:
-        print(colored("  \__ No resolved subdomains found for brute-forcing.", "yellow"))
+        print(colored("  \\__ No resolved subdomains found for brute-forcing.", "yellow"))
         return
 
     # Define a common wordlist
@@ -56,10 +56,10 @@ def init(db, domain):
         if os.path.exists(alt_path):
             wordlist_path = alt_path
         else:
-            print(colored(f"  \__ Wordlist not found at {wordlist_path}. Skipping directory brute-force.", "red"))
+            print(colored(f"  \\__ Wordlist not found at {wordlist_path}. Skipping directory brute-force.", "red"))
             return
 
-    print(colored(f"  \__ Brute-forcing {len(resolved_subdomains)} subdomains in parallel...", "cyan"))
+    print(colored(f"  \\__ Brute-forcing {len(resolved_subdomains)} subdomains in parallel...", "cyan"))
 
     with ThreadPoolExecutor(max_workers=10) as executor:
         futures = {executor.submit(brute_force_subdomain, sub, wordlist_path, domain): sub for sub in resolved_subdomains}
@@ -67,6 +67,6 @@ def init(db, domain):
         for future in as_completed(futures):
             subdomain, output_file, success = future.result()
             if success:
-                print(colored(f"    \__ Finished {subdomain}. Results in {output_file}", "green"))
+                print(colored(f"    \\__ Finished {subdomain}. Results in {output_file}", "green"))
             else:
-                print(colored(f"    \__ Failed brute-forcing {subdomain}", "red"))
+                print(colored(f"    \\__ Failed brute-forcing {subdomain}", "red"))

@@ -9,7 +9,7 @@ def init(domain):
     print(colored("[*]-Searching with Amass...", "yellow"))
 
     if not which("amass"):
-        print(colored("  \__ Amass command not found in PATH. Skipping...", "red"))
+        print(colored("  \\__ Amass command not found in PATH. Skipping...", "red"))
         return []
 
     try:
@@ -39,7 +39,7 @@ def init(domain):
                     AM.append(line.strip().lower())
             os.remove(tmp_path) # Clean up temp file
 
-        print(f"  \__ {colored('Subdomains found', 'cyan')}: {colored(len(set(AM)), 'yellow')}")
+        print(f"  \\__ {colored('Subdomains found', 'cyan')}: {colored(len(set(AM)), 'yellow')}")
     except Exception as e:
-        print(colored(f"  \__ Error running Amass: {e}", "red"))
+        print(colored(f"  \\__ Error running Amass: {e}", "red"))
     return list(set(AM))

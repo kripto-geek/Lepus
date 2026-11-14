@@ -1,6 +1,6 @@
 [![GitHub License](https://img.shields.io/badge/License-BSD%203--Clause-informational.svg)](https://github.com/GKNSB/Lepus/blob/master/LICENSE)
 [![GitHub Python](https://img.shields.io/badge/Python-%3E=%203.8-informational.svg)](https://www.python.org/)
-[![GitHub Version](https://img.shields.io/badge/Version-3.6.0-green.svg)](https://github.com/GKNSB/Lepus)
+[![GitHub Version](https://img.shields.io/badge/Version-3.6.1-green.svg)](https://github.com/GKNSB/Lepus)
 
 # Lepus - The Ultimate Reconnaissance Tool
 
@@ -51,12 +51,11 @@ The Collectors mode collects subdomains from the following services:
 |[CRT](https://crt.sh/)|No|
 |[DNSTrails](https://securitytrails.com/dns-trails/)|Yes|
 |[FOFA](https://fofa.so/)|Yes|
-|[Google Transparency](https://transparencyreport.google.com/)|No|
 |[HackerTarget](https://hackertarget.com/)|No|
 |[PassiveTotal](https://www.riskiq.com/products/passivetotal/)|Yes|
 |[PDChaos](https://chaos.projectdiscovery.io/)|Yes|
 |[Shodan](https://www.shodan.io/)|Yes|
-|[Spyse](https://api-doc.spyse.com/)|Yes|
+|[URLScan](https://urlscan.io/)|No|
 |[VirusTotal](https://www.virustotal.com/)|Yes|
 |[Wayback Machine](https://archive.org/web/)|No|
 |[ZoomEye](https://www.zoomeye.org/)|Yes|
@@ -389,6 +388,9 @@ options:
   -t, --threads THREADS
                         number of threads [default is 200]
   -nc, --no-collectors  skip passive subdomain enumeration
+  --collector-timeout COLLECTOR_TIMEOUT
+                        max seconds to wait for all collectors [default is
+                        300]
   -zt, --zone-transfer  attempt to zone transfer from identified name servers
   --permutate           perform permutations on resolved domains
   -pw, --permutation-wordlist PERMUTATION_WORDLIST

@@ -9,7 +9,7 @@ def init(domain):
     print(colored("[*]-Searching with Subfinder...", "yellow"))
 
     if not which("subfinder"):
-        print(colored("  \__ Subfinder command not found in PATH. Skipping...", "red"))
+        print(colored("  \\__ Subfinder command not found in PATH. Skipping...", "red"))
         return []
 
     try:
@@ -31,7 +31,7 @@ def init(domain):
                     SF.append(line.strip().lower())
             os.remove(tmp_path) # Clean up temp file
 
-        print(f"  \__ {colored('Subdomains found', 'cyan')}: {colored(len(set(SF)), 'yellow')}")
+        print(f"  \\__ {colored('Subdomains found', 'cyan')}: {colored(len(set(SF)), 'yellow')}")
     except Exception as e:
-        print(colored(f"  \__ Error running Subfinder: {e}", "red"))
+        print(colored(f"  \\__ Error running Subfinder: {e}", "red"))
     return list(set(SF))

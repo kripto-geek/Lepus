@@ -9,7 +9,6 @@ import asyncio
 import importlib
 import pkgutil
 import sys
-import io
 import collectors
 import submodules.Permutations
 import submodules.PortScan
@@ -26,27 +25,46 @@ import utilities.DatabaseHelpers
 import utilities.Reporting
 import utilities.MiscHelpers
 import utilities.ScanHelpers
-from concurrent.futures import ThreadPoolExecutor, as_completed
 import threading
 
 simplefilter("ignore")
-version = "3.6.0"
+version = "3.6.1"
 
 
 class _ThreadLocalStdout:
-    """Thread-safe stdout wrapper that redirects per-thread to a buffer."""
+    """Thread-safe stdout wrapper: prefixes worker-thread output with the
+    collector's name and serializes writes so concurrent collectors don't
+    garble each other's lines."""
+
     def __init__(self, original):
         self._original = original
+        self._lock = threading.Lock()
         self._local = threading.local()
 
-    def _stream(self):
-        return getattr(self._local, "buffer", None) or self._original
+    def set_label(self, label):
+        self._local.label = label
+        self._local.at_line_start = True
+
+    def clear_label(self):
+        self._local.label = None
 
     def write(self, data):
-        self._stream().write(data)
+        label = getattr(self._local, "label", None)
+        with self._lock:
+            if not label:
+                return self._original.write(data)
+            for part in data.splitlines(keepends=True):
+                if self._local.at_line_start and part and part != "\n":
+                    self._original.write(colored(f"[{label}] ", "cyan"))
+                self._original.write(part)
+                if part.endswith("\n") or part == "":
+                    self._local.at_line_start = True
+                else:
+                    self._local.at_line_start = False
+            self._original.flush()
 
     def flush(self):
-        self._stream().flush()
+        self._original.flush()
 
     def fileno(self):
         return self._original.fileno()
@@ -78,61 +96,55 @@ def discover_collectors():
             if hasattr(mod, "init"):
                 collector_modules.append(mod)
         except Exception as e:
-            print(colored(f"  \__ Failed to load collector {modname}: {e}", "red"))
+            print(colored(f"  \\__ Failed to load collector {modname}: {e}", "red"))
     return collector_modules
 
 
-_collector_outputs = {}
 _collector_stats = {}
 _collector_lock = threading.Lock()
 
 
 def run_collector_sync(collector_mod, domain):
     name = collector_mod.__name__.split(".")[-1]
-    buf = io.StringIO()
-    _thread_stdout._local.buffer = buf
+    sys.stdout.set_label(name)
     try:
         results = collector_mod.init(domain)
         count = len(results) if results else 0
+        error = None
     except Exception as e:
-        buf.write(colored(f"  \__ {name} error: {e}", "red") + "\n")
-        count = 0
-        results = []
+        print(colored(f"  \\__ error: {e}", "red"))
+        count, results, error = 0, [], e
     finally:
-        _thread_stdout._local.buffer = None
-        text = buf.getvalue()
-        buf.close()
+        sys.stdout.clear_label()
 
     with _collector_lock:
-        _collector_outputs[name] = text
-        _collector_stats[name] = count
+        _collector_stats[name] = {"count": count, "error": error}
 
-    if results:
-        return list(results)
-    return []
+    return list(results) if results else []
 
 
-async def run_collectors_concurrent(domain):
-    global _collector_outputs, _collector_stats
-    _collector_outputs = {}
+async def run_collectors_concurrent(domain, timeout):
+    global _collector_stats
     _collector_stats = {}
 
     collector_list = discover_collectors()
-    print(colored(f"  \__ Running {len(collector_list)} collectors concurrently...", "cyan"))
+    print(colored(f"  \\__ Running {len(collector_list)} collectors concurrently (timeout: {timeout}s)...", "cyan"))
 
     loop = asyncio.get_event_loop()
-    name_map = {}
     tasks = {}
     for cm in collector_list:
-        name = cm.__name__.split(".")[-1]
-        name_map[name] = cm
         fut = loop.run_in_executor(None, run_collector_sync, cm, domain)
-        tasks[name] = fut
+        tasks[cm.__name__.split(".")[-1]] = fut
 
     all_subdomains = []
-    pending = len(tasks)
+    deadline = time() + timeout
     while tasks:
-        done, _ = await asyncio.wait(tasks.values(), return_when="FIRST_COMPLETED")
+        remaining = deadline - time()
+        if remaining <= 0:
+            break
+        done, _ = await asyncio.wait(tasks.values(), timeout=remaining, return_when="FIRST_COMPLETED")
+        if not done:
+            break
         for fut in done:
             name = next(n for n, f in tasks.items() if f == fut)
             del tasks[name]
@@ -144,26 +156,29 @@ async def run_collectors_concurrent(domain):
                 pass
             pending = len(tasks)
             if pending > 0:
-                count = _collector_stats.get(name, 0)
-                print(colored(f"    \__ {name}: {count} subdomains ({pending} remaining)", "cyan"))
+                print(colored(f"    \\__ {name}: done ({pending} remaining)", "cyan"))
+
+    if tasks:
+        for fut in tasks.values():
+            fut.cancel()
+        for name in list(tasks):
+            with _collector_lock:
+                _collector_stats[name] = {"count": 0, "error": "timed out"}
+        print(colored(f"    \\__ {len(tasks)} collectors timed out after {timeout}s and were skipped", "red"))
 
     print()
-    # Print per-collector output in module order
-    for cm in collector_list:
-        name = cm.__name__.split(".")[-1]
-        text = _collector_outputs.get(name, "")
-        if text:
-            print(text, end="")
-
-    # Print summary table
+    # Print summary table in module order
     if _collector_stats:
-        print(colored("  \__ Collector Summary:", "cyan"))
-        found_any = [(n, c) for n, c in _collector_stats.items() if c > 0]
-        found_none = [n for n, c in _collector_stats.items() if c == 0]
+        print(colored("  \\__ Collector Summary:", "cyan"))
+        found_any = [(n, s["count"]) for n, s in _collector_stats.items() if s["error"] is None and s["count"] > 0]
+        found_none = [n for n, s in _collector_stats.items() if s["error"] is None and s["count"] == 0]
+        failed = [(n, s["error"]) for n, s in _collector_stats.items() if s["error"] is not None]
         for name, count in found_any:
             print(f"      {colored('OK', 'green'):>6}  {name:<20} {colored(str(count), 'yellow'):>5} subdomains")
         for name in found_none:
             print(f"      {colored('--', 'yellow'):>6}  {name:<20} {colored('0', 'red'):>5} subdomains")
+        for name, error in failed:
+            print(f"      {colored('!!', 'red'):>6}  {name:<20} {colored(str(error), 'red'):>5}")
 
     return all_subdomains
 
@@ -175,6 +190,7 @@ if __name__ == "__main__":
     parser.add_argument("-hw", "--hide-wildcards", action="store_true", dest="hideWildcards", help="hide wildcard resolutions", default=False)
     parser.add_argument("-t", "--threads", action="store", dest="threads", help="number of threads [default is 200]", type=int, default=200)
     parser.add_argument("-nc", "--no-collectors", action="store_true", dest="noCollectors", help="skip passive subdomain enumeration", default=False)
+    parser.add_argument("--collector-timeout", action="store", dest="collector_timeout", help="max seconds to wait for all collectors [default is 300]", type=int, default=300)
     parser.add_argument("-zt", "--zone-transfer", action="store_true", dest="zoneTransfer", help="attempt to zone transfer from identified name servers", default=False)
     parser.add_argument("--permutate", action="store_true", dest="permutate", help="perform permutations on resolved domains", default=False)
     parser.add_argument("-pw", "--permutation-wordlist", dest="permutation_wordlist", help="wordlist to perform permutations with [default is lists/words.txt]", type=FileType("r"), default="lists/words.txt")
@@ -232,8 +248,8 @@ if __name__ == "__main__":
         collector_subdomains = None
         if not args.noCollectors:
             print()
-            collector_subdomains = asyncio.run(run_collectors_concurrent(args.domain))
-            print(colored(f"  \__ Total unique subdomains from collectors: {len(set(collector_subdomains))}", "green"))
+            collector_subdomains = asyncio.run(run_collectors_concurrent(args.domain, args.collector_timeout))
+            print(colored(f"  \\__ Total unique subdomains from collectors: {len(set(collector_subdomains))}", "green"))
 
         wordlist_subdomains = None
         if args.wordlist:
@@ -250,6 +266,11 @@ if __name__ == "__main__":
         del wordlist_subdomains
 
         if findings:
+            if len(findings) > 20000:
+                print(colored(f"\n[!] WARNING: {len(findings)} candidate hostnames collected. A scan this large takes a long time to resolve.", "red"))
+                print(colored("    If this looks wrong (e.g. junk from a misbehaving data source such as a bad subfinder", "red"))
+                print(colored("    config), re-run with -nc / --no-collectors and clean up the offending source.", "red"))
+
             utilities.ScanHelpers.identifyWildcards(db, findings, args.domain, args.threads)
             utilities.ScanHelpers.massResolve(db, findings, args.domain, args.hideWildcards, args.threads)
 
@@ -313,7 +334,7 @@ if __name__ == "__main__":
                 for item in new_tkos:
                     print(colored(item, "red"))
             if not new_res and not new_ports and not new_tkos:
-                print(colored("  \__ No changes detected.", "cyan"))
+                print(colored("  \\__ No changes detected.", "cyan"))
 
         if new_tkos and args.telegram_token and args.telegram_chat_id:
             text = f"*Lepus Alert: New Takeover Vulnerabilities for {args.domain}*\n\n"

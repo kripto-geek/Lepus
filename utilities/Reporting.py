@@ -11,7 +11,7 @@ def generate_json_report(db, domain):
     try:
         findings = utilities.DatabaseHelpers.getAllFindings(db, domain)
     except Exception as e:
-        print(colored(f"  \__ Error retrieving findings: {e}", "red"))
+        print(colored(f"  \\__ Error retrieving findings: {e}", "red"))
         return
 
     path = os.path.join("findings", domain)
@@ -21,7 +21,7 @@ def generate_json_report(db, domain):
     with open(report_path, "w") as f:
         json.dump(findings, f, indent=4)
 
-    print(colored(f"  \__ JSON report saved to {report_path}", "green"))
+    print(colored(f"  \\__ JSON report saved to {report_path}", "green"))
 
 
 def generate_html_report(db, domain):
@@ -31,7 +31,7 @@ def generate_html_report(db, domain):
     try:
         findings = utilities.DatabaseHelpers.getAllFindings(db, domain)
     except Exception as e:
-        print(colored(f"  \__ Error retrieving findings: {e}", "red"))
+        print(colored(f"  \\__ Error retrieving findings: {e}", "red"))
         return
 
     path = os.path.join("findings", domain)
@@ -168,4 +168,4 @@ def generate_html_report(db, domain):
     with open(report_path, "w") as f:
         f.write(html)
 
-    print(colored(f"  \__ HTML report saved to {report_path}", "green"))
+    print(colored(f"  \\__ HTML report saved to {report_path}", "green"))

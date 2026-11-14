@@ -29,20 +29,20 @@ def init(domain):
                     if val and not val.startswith("*"):
                         CRT.add(val)
 
-            print("  \__ {0}: {1}".format(colored("Subdomains found", "cyan"), colored(len(CRT), "yellow")))
+            print("  \\__ {0}: {1}".format(colored("Subdomains found", "cyan"), colored(len(CRT), "yellow")))
             return list(CRT)
 
         else:
-            print("  \__ {0}: {1}".format(colored("Error", "red"), response.status_code))
+            print("  \\__ {0}: {1}".format(colored("Error", "red"), response.status_code))
             return []
 
     except requests.exceptions.RequestException as err:
-        print("  \__", colored(err, "red"))
+        print("  \\__", colored(err, "red"))
         return []
 
     except ValueError:
-        print("  \__ {0}: {1}".format(colored("Error", "red"), "Invalid API response"))
+        print("  \\__ {0}: {1}".format(colored("Error", "red"), "Invalid API response"))
         return []
     except Exception:
-        print("  \__", colored("Something went wrong!", "red"))
+        print("  \\__", colored("Something went wrong!", "red"))
         return []

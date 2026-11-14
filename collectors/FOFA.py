@@ -16,7 +16,7 @@ def init(domain):
     FOFA_KEY = parser.get("FOFA", "FOFA_KEY")
 
     if not FOFA_KEY:
-        print("  \__", colored("No FOFA API key configured", "red"))
+        print("  \\__", colored("No FOFA API key configured", "red"))
         return []
 
     query = b64encode(f'domain="{domain}"'.encode()).decode()
@@ -27,14 +27,14 @@ def init(domain):
         if response.status_code == 200:
             data = response.json()
             if data.get("error"):
-                print(f"  \__ {colored('FOFA API Error', 'red')}: {data['errmsg']}")
+                print(f"  \\__ {colored('FOFA API Error', 'red')}: {data['errmsg']}")
                 return []
             for result in data.get('results', []):
                 FOFA.extend(findall(rf'([\w\d][\w\d\-\.]*\.{domain.replace(".", "\\.")})', str(result)))
-            print(f"  \__ {colored('Subdomains found', 'green')}: {len(set(FOFA))}")
+            print(f"  \\__ {colored('Subdomains found', 'green')}: {len(set(FOFA))}")
         else:
-            print(f"  \__ {colored('Error', 'red')}: {response.status_code}")
+            print(f"  \\__ {colored('Error', 'red')}: {response.status_code}")
     except Exception as e:
-        print(f"  \__ {colored('FOFA API Error', 'red')}: {e}")
+        print(f"  \\__ {colored('FOFA API Error', 'red')}: {e}")
 
     return list(set(FOFA))

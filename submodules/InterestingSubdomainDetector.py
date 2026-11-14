@@ -24,7 +24,7 @@ def init(db, domain):
         # This function needs to be implemented in DatabaseHelpers.py
         resolved_subdomains = utilities.DatabaseHelpers.getResolvedSubdomains(db, domain)
     except Exception as e:
-        print(colored(f"  \__ Error retrieving resolved subdomains: {e}", "red"))
+        print(colored(f"  \\__ Error retrieving resolved subdomains: {e}", "red"))
         return
 
     interesting_subdomains = []
@@ -35,7 +35,7 @@ def init(db, domain):
                 break
 
     if interesting_subdomains:
-        print(colored("  \__ Found the following interesting subdomains:", "green"))
+        print(colored("  \\__ Found the following interesting subdomains:", "green"))
         for subdomain in interesting_subdomains:
             print(colored(f"    - {subdomain}", "cyan"))
 
@@ -50,6 +50,6 @@ def init(db, domain):
             for subdomain in interesting_subdomains:
                 writer.writerow([subdomain])
 
-        print(colored(f"  \__ Results saved to {csv_path}", "blue"))
+        print(colored(f"  \\__ Results saved to {csv_path}", "blue"))
     else:
-        print(colored("  \__ No interesting subdomains found.", "red"))
+        print(colored("  \\__ No interesting subdomains found.", "red"))

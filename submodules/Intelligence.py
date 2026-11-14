@@ -20,7 +20,7 @@ def get_kev_data():
                 with open(KEV_CACHE_FILE, 'r') as f:
                     return json.load(f)
 
-        print(colored("  \__ Fetching latest CISA KEV catalog...", "blue"))
+        print(colored("  \\__ Fetching latest CISA KEV catalog...", "blue"))
         response = requests.get(KEV_URL, timeout=15)
         response.raise_for_status()
         kev_data = response.json()
@@ -28,9 +28,9 @@ def get_kev_data():
             json.dump(kev_data, f)
         return kev_data
     except requests.RequestException as e:
-        print(colored(f"  \__ Could not fetch CISA KEV catalog: {e}", "red"))
+        print(colored(f"  \\__ Could not fetch CISA KEV catalog: {e}", "red"))
         if os.path.exists(KEV_CACHE_FILE):
-            print(colored("  \__ Using potentially outdated cache.", "yellow"))
+            print(colored("  \\__ Using potentially outdated cache.", "yellow"))
             with open(KEV_CACHE_FILE, 'r') as f:
                 return json.load(f)
         return None
@@ -40,7 +40,7 @@ def init(domain):
     
     findings_dir = os.path.join("findings", domain)
     if not os.path.exists(findings_dir):
-        print(colored(f"  \__ Findings directory for {domain} not found.", "red"))
+        print(colored(f"  \\__ Findings directory for {domain} not found.", "red"))
         return
 
     kev_data = get_kev_data()
@@ -59,7 +59,7 @@ def init(domain):
             next(reader)  # Skip header
             interesting_subdomains = [row[0] for row in reader]
     except FileNotFoundError:
-        print(colored("  \__ 'interesting_subdomains.csv' not found, skipping.", "yellow"))
+        print(colored("  \\__ 'interesting_subdomains.csv' not found, skipping.", "yellow"))
 
     # Read technologies
     try:
@@ -72,7 +72,7 @@ def init(domain):
                     technologies[subdomain] = []
                 technologies[subdomain].append(tech)
     except FileNotFoundError:
-        print(colored("  \__ 'technologies_deep.csv' not found, skipping.", "yellow"))
+        print(colored("  \\__ 'technologies_deep.csv' not found, skipping.", "yellow"))
 
     # Read vulnerabilities
     try:
@@ -90,7 +90,7 @@ def init(domain):
                     vulnerabilities.append(row)
 
     except FileNotFoundError:
-        print(colored("  \__ 'vulnerabilities.csv' not found, skipping.", "yellow"))
+        print(colored("  \\__ 'vulnerabilities.csv' not found, skipping.", "yellow"))
 
     # Read sensitive files
     try:
@@ -99,7 +99,7 @@ def init(domain):
             next(reader)  # Skip header
             sensitive_files = [row[0] for row in reader]
     except FileNotFoundError:
-        print(colored("  \__ 'sensitive_files.csv' not found, skipping.", "yellow"))
+        print(colored("  \\__ 'sensitive_files.csv' not found, skipping.", "yellow"))
 
     # Correlation Logic
     report = generate_report(domain, interesting_subdomains, technologies, vulnerabilities, sensitive_files, kev_cves)

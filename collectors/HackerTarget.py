@@ -14,11 +14,11 @@ def init(domain):
 	try:
 		response = requests.get(url, headers=headers, timeout=10)
 	except requests.exceptions.RequestException as err:
-		print("  \__", colored(err, "red"))
+		print("  \\__", colored(err, "red"))
 		return []
 
 	if response.status_code != 200:
-		print("  \__ {0}: {1}".format(colored("Error", "red"), response.status_code))
+		print("  \\__ {0}: {1}".format(colored("Error", "red"), response.status_code))
 		return []
 
 	try:
@@ -30,9 +30,9 @@ def init(domain):
 
 		HT = set(HT)
 
-		print("  \__ {0}: {1}".format(colored("Subdomains found", "cyan"), colored(len(HT), "yellow")))
+		print("  \\__ {0}: {1}".format(colored("Subdomains found", "cyan"), colored(len(HT), "yellow")))
 		return HT
 
 	except Exception:
-		print("  \__", colored("Something went wrong!", "red"))
+		print("  \\__", colored("Something went wrong!", "red"))
 		return []

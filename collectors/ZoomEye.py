@@ -15,7 +15,7 @@ def init(domain):
     ZOOMEYE_API_KEY = parser.get("ZoomEye", "ZOOMEYE_API_KEY")
 
     if not ZOOMEYE_API_KEY:
-        print("  \__", colored("No ZoomEye API key configured", "red"))
+        print("  \\__", colored("No ZoomEye API key configured", "red"))
         return []
 
     url = f"https://api.zoomeye.org/domain/search?q={domain}&type=1&page=1"
@@ -28,8 +28,8 @@ def init(domain):
             for result in data.get("list", []):
                 ZOOM.append(result['name'])
         else:
-            print("  \__", colored(f"Error: {response.status_code}", "red"))
+            print("  \\__", colored(f"Error: {response.status_code}", "red"))
     except Exception as e:
-        print("  \__", colored(f"Error: {str(e)}", "red"))
+        print("  \\__", colored(f"Error: {str(e)}", "red"))
 
     return list(set(ZOOM))

@@ -14,7 +14,7 @@ def init(domain):
     API_KEY = parser.get("Censys", "CENSYS_API_KEY")
 
     if not API_KEY:
-        print("  \__", colored("No Censys API key configured", "red"))
+        print("  \\__", colored("No Censys API key configured", "red"))
         return []
 
     headers = {"Content-Type": "application/json", "X-API-Key": API_KEY}
@@ -27,10 +27,10 @@ def init(domain):
             data = response.json()
             for result in data.get("result", {}).get("hits", []):
                 C.extend(findall(rf'([\w\d][\w\d\-\.]*\.{domain.replace(".", "\\.")})', str(result)))
-            print(f"  \__ {colored('Subdomains found', 'green')}: {len(set(C))}")
+            print(f"  \\__ {colored('Subdomains found', 'green')}: {len(set(C))}")
         else:
-            print(f"  \__ {colored('Error', 'red')}: {response.status_code}")
+            print(f"  \\__ {colored('Error', 'red')}: {response.status_code}")
     except Exception as e:
-        print(f"  \__ {colored('Censys API Error', 'red')}: {e}")
+        print(f"  \\__ {colored('Censys API Error', 'red')}: {e}")
 
     return list(set(C))

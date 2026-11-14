@@ -687,7 +687,7 @@ def identify(domain, ARecords, CNAMERecords):
 	for entry in CNAMERecords:
 		CNAME = str(entry)[:-1]
 
-		if (findall(".*s3.*.amazonaws\.com", CNAME)):
+		if (findall(r".*s3.*\.amazonaws\.com", CNAME)):
 			outcome = amazonS3(domain, ARecords, CNAME)
 
 		elif "bitbucket.io" in CNAME:
@@ -940,10 +940,10 @@ def massTakeOver(targets, threads):
 					leaveFlag = True
 
 				if numberOfChunks == 1:
-					completed = tqdm(completed, total=len(targetChunk), desc="  \__ {0}".format(colored("Progress", "cyan")), dynamic_ncols=True, leave=leaveFlag)
+					completed = tqdm(completed, total=len(targetChunk), desc="  \\__ {0}".format(colored("Progress", "cyan")), dynamic_ncols=True, leave=leaveFlag)
 
 				else:
-					completed = tqdm(completed, total=len(targetChunk), desc="  \__ {0}".format(colored("Progress {0}/{1}".format(iteration, numberOfChunks), "cyan")), dynamic_ncols=True, leave=leaveFlag)
+					completed = tqdm(completed, total=len(targetChunk), desc="  \\__ {0}".format(colored("Progress {0}/{1}".format(iteration, numberOfChunks), "cyan")), dynamic_ncols=True, leave=leaveFlag)
 
 				for task in completed:
 					result = task.result()
@@ -1020,10 +1020,10 @@ def init(db, domain, old_takeovers, threads):
 		else:
 			takeovers.append((domain, row.provider, row.signature))
 
-	print("    \__ {0} {1}".format(colored("New takeover vulnerabilities that were identified:", "yellow"), colored(len(takeovers), "cyan")))
+	print("    \\__ {0} {1}".format(colored("New takeover vulnerabilities that were identified:", "yellow"), colored(len(takeovers), "cyan")))
 
 	for takeover in takeovers:
-		print("      \__ {0}: {1}, {2}".format(colored(takeover[0], "cyan"), colored(takeover[1], "yellow"), colored(takeover[2], "yellow")))
+		print("      \\__ {0}: {1}, {2}".format(colored(takeover[0], "cyan"), colored(takeover[1], "yellow"), colored(takeover[2], "yellow")))
 
 		if notify:
 			if takeover[0] not in old_takeovers:

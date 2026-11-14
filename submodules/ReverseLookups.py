@@ -11,18 +11,18 @@ def add_cidr_ips(IPs, cidr_str):
         net = ip_network(cidr_str, strict=False)
         prefix = net.prefixlen
         if prefix < 16:
-            print(colored(f"  \__ CIDR {cidr_str} is too large (/{prefix}), expanding only first /16 subnet", "yellow"))
+            print(colored(f"  \\__ CIDR {cidr_str} is too large (/{prefix}), expanding only first /16 subnet", "yellow"))
             for subnet in net.subnets(new_prefix=16):
                 for ip in subnet.hosts():
                     IPs.add(str(ip))
                     if len(IPs) > 50000:
-                        print(colored(f"  \__ Reached 50k IP limit from CIDR expansion", "yellow"))
+                        print(colored(f"  \\__ Reached 50k IP limit from CIDR expansion", "yellow"))
                         return
         else:
             for ip in net.hosts():
                 IPs.add(str(ip))
     except Exception as e:
-        print(colored(f"  \__ Error expanding CIDR {cidr_str}: {e}", "red"))
+        print(colored(f"  \\__ Error expanding CIDR {cidr_str}: {e}", "red"))
 
 
 def init(db, domain, ripe, ranges, only_ranges, threads):
@@ -47,5 +47,5 @@ def init(db, domain, ripe, ranges, only_ranges, threads):
                 IPs.add(row.address)
 
     IPs = list(IPs)
-    print(colored(f"  \__ Collected {len(IPs)} unique IPs for reverse lookup", "cyan"))
+    print(colored(f"  \\__ Collected {len(IPs)} unique IPs for reverse lookup", "cyan"))
     massReverseLookup(db, domain, IPs, threads)

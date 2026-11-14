@@ -38,11 +38,11 @@ def init(domain):
     try:
         response = requests.get(searchUrl, headers=headers, timeout=15)
     except requests.exceptions.RequestException as err:
-        print("  \__", colored(err, "red"))
+        print("  \\__", colored(err, "red"))
         return []
 
     if response.status_code != 200:
-        print("  \__ {0}: {1}".format(colored("Error", "red"), response.status_code))
+        print("  \\__ {0}: {1}".format(colored("Error", "red"), response.status_code))
         return []
 
     try:
@@ -64,12 +64,12 @@ def init(domain):
 
         R = list(set(R))
 
-        print("  \__ {0}: {1}".format(colored("Networks found", "cyan"), colored(len(R), "yellow")))
+        print("  \\__ {0}: {1}".format(colored("Networks found", "cyan"), colored(len(R), "yellow")))
         return R
 
     except (ValueError, TypeError):
-        print("  \__ {0}: {1}".format(colored("Error", "red"), "Invalid API response"))
+        print("  \\__ {0}: {1}".format(colored("Error", "red"), "Invalid API response"))
         return []
     except Exception:
-        print("  \__", colored("Something went wrong!", "red"))
+        print("  \\__", colored("Something went wrong!", "red"))
         return []

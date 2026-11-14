@@ -1,3 +1,18 @@
+# Version 3.6.1
+
+### --- Bug Fixes
+1. **CertSpotter pagination**: absolute URLs from the `Link` header were concatenated onto the base URL, producing the invalid host `api.certspotter.comhttps`. Absolute URLs are now used as-is.
+2. **Duplicate crt.sh collector**: `GoogleTransparency` was querying crt.sh (not Google), so crt.sh was hit twice every run. Removed.
+3. **Dead collectors removed**: ThreatCrowd, ThreatMiner, Spyse, Riddler, ProjectSonar (bufferover.run) and ProjectCrobat (omnisint.io) are shut down and no longer produce errors every run.
+4. **Invalid escape sequences**: ~200 `SyntaxWarning: invalid escape sequence` warnings eliminated (`\__` → `\\__`); also fixed an unescaped `\.` regex in TakeOver's S3 detection.
+5. **Swallowed collector output**: collector output is no longer buffered until the end of the run; it now streams live, prefixed with the collector name, serialized by a lock.
+6. **No collector deadline**: the collector phase could hang forever on one slow source. All collectors now respect an overall timeout (`--collector-timeout`, default 300s); timed-out collectors are skipped and reported.
+7. **Junk findings warning**: when more than 20,000 candidate hostnames are collected, lepus now warns loudly that the run will take very long and how to diagnose a misbehaving source.
+
+### --- New Features
+1. New `URLScan` collector (free, no API key) using the urlscan.io search API as a modern replacement for the removed dead sources.
+2. `--collector-timeout` argument.
+
 # Version 3.6.0
 
 ### --- New Features

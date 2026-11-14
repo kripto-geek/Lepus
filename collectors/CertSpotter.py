@@ -20,16 +20,22 @@ def init(domain):
 
     while next_link:
         try:
-            response = requests.get(base_url + next_link, headers=headers, timeout=10)
+            # The Link header returns an absolute URL; only prefix when it is a relative path
+            if next_link.startswith("http://") or next_link.startswith("https://"):
+                request_url = next_link
+            else:
+                request_url = base_url + next_link
+
+            response = requests.get(request_url, headers=headers, timeout=10)
 
             if response.status_code == 429:
                 if CS:
                     break
-                print("  \__", colored("Search rate limit exceeded.", "red"))
+                print("  \\__", colored("Search rate limit exceeded.", "red"))
                 return []
 
             if response.status_code != 200:
-                print("  \__ {0}: {1}".format(colored("Error", "red"), response.status_code))
+                print("  \\__ {0}: {1}".format(colored("Error", "red"), response.status_code))
                 return []
 
             CS += parseResponse(response.text, domain)
@@ -48,13 +54,13 @@ def init(domain):
                 break
 
         except requests.exceptions.RequestException as err:
-            print("  \__", colored(err, "red"))
+            print("  \\__", colored(err, "red"))
             return []
 
         except Exception:
-            print("  \__", colored("Something went wrong!", "red"))
+            print("  \\__", colored("Something went wrong!", "red"))
             return []
 
     CS = set(CS)
-    print("  \__ {0}: {1}".format(colored("Subdomains found", "cyan"), colored(len(CS), "yellow")))
+    print("  \\__ {0}: {1}".format(colored("Subdomains found", "cyan"), colored(len(CS), "yellow")))
     return CS

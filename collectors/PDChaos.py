@@ -14,7 +14,7 @@ def init(domain):
     CHAOS_KEY = parser.get("PDChaos", "CHAOS_API_KEY")
 
     if not CHAOS_KEY:
-        print("  \__", colored("No Project Discovery Chaos API key configured", "red"))
+        print("  \\__", colored("No Project Discovery Chaos API key configured", "red"))
         return []
 
     headers = {"user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:88.0) Gecko/20100101 Firefox/88.0", "Authorization": CHAOS_KEY}
@@ -23,11 +23,11 @@ def init(domain):
     try:
         response = requests.get(url, headers=headers, timeout=15)
     except requests.exceptions.RequestException as err:
-        print("  \__", colored(err, "red"))
+        print("  \\__", colored(err, "red"))
         return []
 
     if response.status_code != 200:
-        print("  \__ {0}: {1}".format(colored("Error", "red"), response.status_code))
+        print("  \\__ {0}: {1}".format(colored("Error", "red"), response.status_code))
         return []
 
     try:
@@ -37,12 +37,12 @@ def init(domain):
             if subdomain:
                 PDCH.add("{0}.{1}".format(subdomain, domain))
 
-        print("  \__ {0}: {1}".format(colored("Subdomains found", "cyan"), colored(len(PDCH), "yellow")))
+        print("  \\__ {0}: {1}".format(colored("Subdomains found", "cyan"), colored(len(PDCH), "yellow")))
         return list(PDCH)
 
     except (ValueError, TypeError):
-        print("  \__ {0}: {1}".format(colored("Error", "red"), "Invalid API response"))
+        print("  \\__ {0}: {1}".format(colored("Error", "red"), "Invalid API response"))
         return []
     except Exception:
-        print("  \__", colored("Something went wrong!", "red"))
+        print("  \\__", colored("Something went wrong!", "red"))
         return []

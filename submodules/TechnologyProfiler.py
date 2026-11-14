@@ -171,11 +171,11 @@ def init(db, domain, threads=10):
     try:
         resolved_subdomains = utilities.DatabaseHelpers.getResolvedSubdomains(db, domain)
     except Exception as e:
-        print(colored(f"  \__ Error retrieving resolved subdomains: {e}", "red"))
+        print(colored(f"  \\__ Error retrieving resolved subdomains: {e}", "red"))
         return
 
     if not resolved_subdomains:
-        print(colored("  \__ No resolved subdomains found for technology profiling.", "red"))
+        print(colored("  \\__ No resolved subdomains found for technology profiling.", "red"))
         return
 
     all_findings = []
@@ -189,9 +189,9 @@ def init(db, domain, threads=10):
             processed_count += 1
 
             if error:
-                print(colored(f"  \__ Error profiling {hostname}: {error}", "red"))
+                print(colored(f"  \\__ Error profiling {hostname}: {error}", "red"))
             elif technologies:
-                print(colored(f"  \__ {hostname}:", "green"))
+                print(colored(f"  \\__ {hostname}:", "green"))
                 for tech in technologies:
                     print(colored(f"    - {tech}", "cyan"))
 
@@ -224,7 +224,7 @@ def init(db, domain, threads=10):
                     all_findings.append(finding)
 
             if processed_count % 10 == 0:
-                print(colored(f"  \__ Processed {processed_count}/{len(resolved_subdomains)} subdomains...", "blue"))
+                print(colored(f"  \\__ Processed {processed_count}/{len(resolved_subdomains)} subdomains...", "blue"))
 
     if all_findings:
         findings_dir = os.path.join("findings", domain)
@@ -236,7 +236,7 @@ def init(db, domain, threads=10):
             writer.writeheader()
             writer.writerows(all_findings)
 
-        print(colored(f"  \__ Deep technology profiling results saved to {csv_path}", "blue"))
-        print(colored(f"  \__ Total technologies identified: {len(all_findings)}", "green"))
+        print(colored(f"  \\__ Deep technology profiling results saved to {csv_path}", "blue"))
+        print(colored(f"  \\__ Total technologies identified: {len(all_findings)}", "green"))
     else:
-        print(colored("  \__ No technologies found.", "red"))
+        print(colored("  \\__ No technologies found.", "red"))

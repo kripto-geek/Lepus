@@ -143,11 +143,11 @@ async def init(db, domain):
     try:
         resolved_subdomains = utilities.DatabaseHelpers.getResolvedSubdomains(db, domain)
     except Exception as e:
-        print(colored(f"  \__ Error retrieving resolved subdomains: {e}", "red"))
+        print(colored(f"  \\__ Error retrieving resolved subdomains: {e}", "red"))
         return
 
     if not resolved_subdomains:
-        print(colored("  \__ No resolved subdomains found to scan.", "yellow"))
+        print(colored("  \\__ No resolved subdomains found to scan.", "yellow"))
         return
 
     print(colored("[*]-Pre-screening subdomains for live web servers...", "yellow"))
@@ -165,7 +165,7 @@ async def init(db, domain):
         live_subdomains.append(await live_subdomains_queue.get())
 
     if not live_subdomains:
-        print(colored("  \__ No live web servers found to scan.", "red"))
+        print(colored("  \\__ No live web servers found to scan.", "red"))
         return
 
     print(colored(f"\n[*]-Found {len(live_subdomains)} live subdomains. Starting sensitive file scan...", "yellow"))
@@ -185,6 +185,6 @@ async def init(db, domain):
                 writer.writerow([url])
 
         print(colored(f"\n[+] Scan complete. Found {len(found_files)} potential sensitive files.", "green"))
-        print(colored(f"  \__ Results saved to {csv_path}", "blue"))
+        print(colored(f"  \\__ Results saved to {csv_path}", "blue"))
     else:
         print(colored("\n[-] Scan complete. No sensitive files found.", "red"))
